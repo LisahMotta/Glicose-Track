@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a0a2e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GlicoseTrack">
+<link rel="manifest" href="manifest.json">
+<title>GlicoseTrack</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0618;
+    --surface: #1a0f2e;
+    --surface2: #231540;
+    --border: rgba(180,120,255,0.15);
+    --accent: #c084fc;
+    --accent2: #f0abfc;
+    --danger: #f87171;
+    --warning: #fbbf24;
+    --ok: #4ade80;
+    --text: #f1e8ff;
+    --muted: #9d8ab5;
+    --card: rgba(255,255,255,0.04);
+    --glow: rgba(192,132,252,0.2);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  /* Ambient background */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -30%;
+    left: -20%;
+    width: 70%;
+    height: 70%;
+    background: radial-gradient(ellipse, rgba(192,132,252,0.12) 0%, transparent 65%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -20%;
+    right: -20%;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(ellipse, rgba(240,171,252,0.08) 0%, transparent 65%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* HEADER */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 16px 20px 0;
+    background: linear-gradient(to bottom, var(--bg) 60%, transparent);
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    letter-spacing: -0.02em;
+  }
+  .logo span { color: var(--accent); font-style: italic; }
+
+  .current-reading {
+    text-align: right;
+  }
+  .current-reading .value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.8rem;
+    line-height: 1;
+  }
+  .current-reading .label { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 4px;
+    border: 1px solid var(--border);
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 8px 4px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+  .tab-btn .icon { font-size: 1.1rem; }
+  .tab-btn.active {
+    background: var(--accent);
+    color: #1a0a2e;
+    font-weight: 600;
+    box-shadow: 0 2px 12px var(--glow);
+  }
+
+  /* CONTENT */
+  main {
+    flex: 1;
+    padding: 20px;
+    position: relative;
+    z-index: 1;
+    overflow-y: auto;
+    padding-bottom: 40px;
+  }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.3rem;
+    margin-bottom: 6px;
+  }
+  .section-sub { color: var(--muted); font-size: 0.8rem; margin-bottom: 20px; }
+
+  /* CARDS */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 14px;
+    backdrop-filter: blur(10px);
+  }
+  .card-title {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+
+  /* FORM FIELDS */
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .field input, .field select, .field textarea {
+    width: 100%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 11px 14px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--glow);
+  }
+  .field textarea { resize: none; height: 70px; }
+  .field select option { background: #231540; }
+
+  /* GLICOSE INPUT BIG */
+  .glicose-input-big {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .glicose-input-big input {
+    flex: 1;
+    font-size: 2.5rem;
+    font-family: 'DM Serif Display', serif;
+    text-align: center;
+    padding: 14px;
+    border-radius: 14px;
+    letter-spacing: -0.02em;
+  }
+  .glicose-unit {
+    font-size: 0.8rem;
+    color: var(--muted);
+    min-width: 40px;
+  }
+
+  /* STATUS INDICATOR */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+  .status-badge.low { background: rgba(248,113,113,0.15); color: var(--danger); border: 1px solid rgba(248,113,113,0.3); }
+  .status-badge.normal { background: rgba(74,222,128,0.15); color: var(--ok); border: 1px solid rgba(74,222,128,0.3); }
+  .status-badge.high { background: rgba(251,191,36,0.15); color: var(--warning); border: 1px solid rgba(251,191,36,0.3); }
+  .status-badge.very-low { background: rgba(248,113,113,0.25); color: #fca5a5; border: 1px solid rgba(248,113,113,0.5); animation: pulse-danger 1s infinite; }
+
+  @keyframes pulse-danger {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  /* SYMPTOM CHIPS */
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chip {
+    padding: 7px 13px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .chip.selected {
+    border-color: var(--accent);
+    background: rgba(192,132,252,0.18);
+    color: var(--accent2);
+  }
+
+  /* QUICK TIME BUTTONS */
+  .time-btns {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .time-btn {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.04);
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .time-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* BTN */
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #1a0a2e;
+    box-shadow: 0 4px 20px var(--glow);
+  }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--border);
+    margin-top: 8px;
+  }
+
+  /* MINI CHART */
+  .chart-wrap {
+    width: 100%;
+    height: 180px;
+    position: relative;
+    margin: 10px 0;
+  }
+  canvas { width: 100% !important; }
+
+  /* HISTORY LIST */
+  .history-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    margin-bottom: 10px;
+    position: relative;
+    overflow: hidden;
+  }
+  .history-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    border-radius: 3px 0 0 3px;
+  }
+  .history-item.low::before { background: var(--danger); }
+  .history-item.normal::before { background: var(--ok); }
+  .history-item.high::before { background: var(--warning); }
+  .history-item.very-low::before { background: #fca5a5; box-shadow: 0 0 8px rgba(248,113,113,0.5); }
+
+  .history-glicose {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.8rem;
+    line-height: 1;
+    min-width: 65px;
+    text-align: right;
+  }
+  .history-glicose.low { color: var(--danger); }
+  .history-glicose.normal { color: var(--ok); }
+  .history-glicose.high { color: var(--warning); }
+  .history-glicose.very-low { color: #fca5a5; }
+
+  .history-details { flex: 1; }
+  .history-time { font-size: 0.72rem; color: var(--muted); margin-bottom: 4px; }
+  .history-symptoms { font-size: 0.78rem; color: var(--accent2); margin-top: 4px; }
+  .history-food { font-size: 0.78rem; color: var(--muted); font-style: italic; margin-top: 3px; }
+  .history-note { font-size: 0.75rem; color: var(--muted); margin-top: 3px; }
+
+  .history-delete {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 4px;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+  }
+  .history-delete:hover { opacity: 1; color: var(--danger); }
+
+  /* STATS ROW */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 10px;
+    text-align: center;
+  }
+  .stat-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    display: block;
+  }
+  .stat-label { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+
+  /* FILTER ROW */
+  .filter-row { display: flex; gap: 8px; margin-bottom: 16px; }
+  .filter-btn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .filter-btn.active { background: var(--surface2); color: var(--text); border-color: var(--accent); }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    z-index: 999;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    white-space: nowrap;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.danger { border-color: var(--danger); color: var(--danger); }
+  .toast.success { border-color: var(--ok); color: var(--ok); }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+  }
+  .empty-state .emoji { font-size: 3rem; display: block; margin-bottom: 12px; }
+  .empty-state p { font-size: 0.85rem; line-height: 1.6; }
+
+  /* EXPORT BTN */
+  .export-row { display: flex; gap: 8px; }
+  .export-row .btn { flex: 1; padding: 10px; font-size: 0.8rem; }
+
+  /* RANGE LEGEND */
+  .range-legend {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* MEAL TIME FIELD */
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* ALERT BANNER */
+  .alert-banner {
+    background: rgba(248,113,113,0.1);
+    border: 1px solid rgba(248,113,113,0.3);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    font-size: 0.82rem;
+    color: var(--danger);
+    display: none;
+    align-items: center;
+    gap: 10px;
+  }
+  .alert-banner.visible { display: flex; }
+
+  /* PWA INSTALL */
+  .install-banner {
+    background: linear-gradient(135deg, rgba(192,132,252,0.15), rgba(240,171,252,0.08));
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 14px;
+    display: none;
+    align-items: center;
+    gap: 12px;
+  }
+  .install-banner.visible { display: flex; }
+  .install-banner p { flex: 1; font-size: 0.8rem; color: var(--muted); }
+  .install-banner p strong { color: var(--text); display: block; margin-bottom: 2px; }
+  .install-btn {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: none;
+    background: var(--accent);
+    color: #1a0a2e;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  @media (min-width: 500px) {
+    main { max-width: 480px; margin: 0 auto; }
+    header { max-width: 480px; margin: 0 auto; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div class="logo">Glicose<span>Track</span></div>
+    <div class="current-reading">
+      <div class="value" id="headerValue">—</div>
+      <div class="label">Última leitura</div>
+    </div>
+  </div>
+  <nav class="tabs">
+    <button class="tab-btn active" onclick="switchTab('registro')" id="tab-registro">
+      <span class="icon">⚡</span>Registrar
+    </button>
+    <button class="tab-btn" onclick="switchTab('grafico')" id="tab-grafico">
+      <span class="icon">📈</span>Gráfico
+    </button>
+    <button class="tab-btn" onclick="switchTab('historico')" id="tab-historico">
+      <span class="icon">📋</span>Histórico
+    </button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ========== TAB REGISTRO ========== -->
+  <div class="tab-content active" id="content-registro">
+
+    <div class="install-banner" id="installBanner">
+      <span style="font-size:1.5rem">📲</span>
+      <p><strong>Instalar app</strong>Use offline, sempre à mão</p>
+      <button class="install-btn" id="installBtn">Instalar</button>
+    </div>
+
+    <div class="alert-banner" id="alertBanner">
+      ⚠️ <span id="alertText"></span>
+    </div>
+
+    <p class="section-title">Registro rápido</p>
+    <p class="section-sub">Preencha e salve em segundos</p>
+
+    <!-- GLICOSE -->
+    <div class="card">
+      <div class="card-title">📊 Nível de glicose</div>
+      <div id="statusBadge"></div>
+      <div class="glicose-input-big">
+        <input type="number" id="glicoseVal" placeholder="000" min="20" max="500"
+          oninput="updateStatus()" inputmode="numeric">
+        <span class="glicose-unit">mg/dL</span>
+      </div>
+    </div>
+
+    <!-- DATA/HORA -->
+    <div class="card">
+      <div class="card-title">🕐 Horário</div>
+      <div class="time-btns">
+        <button class="time-btn" onclick="setNow()">Agora</button>
+        <button class="time-btn" onclick="setMinus(15)">-15min</button>
+        <button class="time-btn" onclick="setMinus(30)">-30min</button>
+        <button class="time-btn" onclick="setMinus(60)">-1h</button>
+      </div>
+      <div class="field">
+        <input type="datetime-local" id="dateTime">
+      </div>
+    </div>
+
+    <!-- SINTOMAS -->
+    <div class="card">
+      <div class="card-title">😰 Sintomas</div>
+      <div class="chips" id="symptomsChips">
+        <button class="chip" onclick="toggleChip(this,'Tontura')">🌀 Tontura</button>
+        <button class="chip" onclick="toggleChip(this,'Suor frio')">💧 Suor frio</button>
+        <button class="chip" onclick="toggleChip(this,'Tremor')">🫨 Tremor</button>
+        <button class="chip" onclick="toggleChip(this,'Palpitação')">💓 Palpitação</button>
+        <button class="chip" onclick="toggleChip(this,'Visão turva')">👁️ Visão turva</button>
+        <button class="chip" onclick="toggleChip(this,'Fraqueza')">😮‍💨 Fraqueza</button>
+        <button class="chip" onclick="toggleChip(this,'Fome intensa')">🍽️ Fome intensa</button>
+        <button class="chip" onclick="toggleChip(this,'Ansiedade')">😟 Ansiedade</button>
+        <button class="chip" onclick="toggleChip(this,'Irritabilidade')">😠 Irritabilidade</button>
+        <button class="chip" onclick="toggleChip(this,'Confusão')">🌫️ Confusão</button>
+        <button class="chip" onclick="toggleChip(this,'Sem sintomas')">✅ Sem sintomas</button>
+      </div>
+    </div>
+
+    <!-- REFEIÇÃO ANTERIOR -->
+    <div class="card">
+      <div class="card-title">🍽️ O que comeu antes?</div>
+      <div class="field">
+        <label>Alimento(s)</label>
+        <textarea id="foodBefore" placeholder="Ex: arroz, feijão, refrigerante... Seja detalhada!"></textarea>
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label>Quanto tempo antes?</label>
+          <select id="timeBefore">
+            <option value="">Selecione</option>
+            <option value="menos de 30min">menos de 30min</option>
+            <option value="30–60min">30–60min</option>
+            <option value="1–2h">1–2h</option>
+            <option value="2–3h">2–3h</option>
+            <option value="mais de 3h">mais de 3h</option>
+            <option value="em jejum">em jejum</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Carboidratos (g) aprox.</label>
+          <input type="number" id="carbsGrams" placeholder="Ex: 45" inputmode="numeric" min="0">
+        </div>
+      </div>
+      <div class="field">
+        <label>Quanto tempo após comer sentiu os sintomas?</label>
+        <select id="symptomsDelay">
+          <option value="">Selecione</option>
+          <option value="imediato">Imediato (ainda comendo)</option>
+          <option value="menos de 30min">menos de 30min</option>
+          <option value="30–60min">30–60min</option>
+          <option value="1–2h">1–2h</option>
+          <option value="2–3h">2–3h</option>
+          <option value="mais de 3h">mais de 3h</option>
+          <option value="sem relação">Sem relação com refeição</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- MEDICAMENTOS -->
+    <div class="card">
+      <div class="card-title">💊 Medicamentos</div>
+      <div class="chips" id="medChips">
+        <button class="chip" onclick="toggleChip(this,'Metformina')">Metformina</button>
+        <button class="chip" onclick="toggleChip(this,'Insulina rápida')">Insulina rápida</button>
+        <button class="chip" onclick="toggleChip(this,'Insulina lenta')">Insulina lenta</button>
+        <button class="chip" onclick="toggleChip(this,'Glibenclamida')">Glibenclamida</button>
+        <button class="chip" onclick="toggleChip(this,'Nenhum')">Nenhum</button>
+      </div>
+      <div class="field" style="margin-top:10px">
+        <label>Outro / dose</label>
+        <input type="text" id="medNote" placeholder="Ex: Metformina 500mg às 8h">
+      </div>
+    </div>
+
+    <!-- OBSERVAÇÃO -->
+    <div class="card">
+      <div class="card-title">📝 Observação livre</div>
+      <div class="field">
+        <textarea id="freeNote" placeholder="Atividade física, estresse, algo incomum..."></textarea>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="saveRecord()">✦ Salvar registro</button>
+    <button class="btn btn-ghost" onclick="clearForm()">Limpar formulário</button>
+  </div>
+
+  <!-- ========== TAB GRÁFICO ========== -->
+  <div class="tab-content" id="content-grafico">
+    <p class="section-title">Variação glicêmica</p>
+    <p class="section-sub">Últimas leituras ao longo do tempo</p>
+
+    <div class="stats-row" id="statsRow">
+      <div class="stat-card">
+        <span class="stat-value" id="statMedia">—</span>
+        <span class="stat-label">Média</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value" id="statMin" style="color:var(--danger)">—</span>
+        <span class="stat-label">Mínima</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value" id="statMax" style="color:var(--warning)">—</span>
+        <span class="stat-label">Máxima</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📉 Gráfico (últimos 7 dias)</div>
+      <div class="chart-wrap">
+        <canvas id="glucoseChart"></canvas>
+      </div>
+      <div class="range-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--danger)"></div>Hipoglicemia &lt;70</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--ok)"></div>Normal 70–100</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--warning)"></div>Elevada &gt;100</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">⚡ Padrões de hipoglicemia reativa</div>
+      <div id="patternsContent" style="font-size:0.82rem; color:var(--muted); line-height:1.7"></div>
+    </div>
+  </div>
+
+  <!-- ========== TAB HISTÓRICO ========== -->
+  <div class="tab-content" id="content-historico">
+    <p class="section-title">Histórico</p>
+    <p class="section-sub">Todos os registros salvos</p>
+
+    <div class="filter-row">
+      <button class="filter-btn active" onclick="filterHistory('todos', this)">Todos</button>
+      <button class="filter-btn" onclick="filterHistory('baixo', this)">🔴 Baixo</button>
+      <button class="filter-btn" onclick="filterHistory('normal', this)">🟢 Normal</button>
+      <button class="filter-btn" onclick="filterHistory('alto', this)">🟡 Alto</button>
+    </div>
+
+    <div id="historyList"></div>
+
+    <div class="export-row" style="margin-top:16px">
+      <button class="btn btn-ghost" onclick="exportCSV()" style="font-size:0.8rem;padding:10px">📄 Exportar CSV</button>
+      <button class="btn btn-ghost" onclick="clearAll()" style="font-size:0.8rem;padding:10px;color:var(--danger)">🗑️ Limpar tudo</button>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ========== DATA ==========
+let records = JSON.parse(localStorage.getItem('glicose_records') || '[]');
+let selectedSymptoms = [];
+let selectedMeds = [];
+let currentFilter = 'todos';
+let deferredPrompt = null;
+
+// ========== PWA INSTALL ==========
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBanner').classList.add('visible');
+});
+document.getElementById('installBtn').addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  if (outcome === 'accepted') {
+    document.getElementById('installBanner').classList.remove('visible');
+    deferredPrompt = null;
+  }
+});
+
+// ========== INIT ==========
+setNow();
+updateHeaderValue();
+
+function setNow() {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  document.getElementById('dateTime').value = now.toISOString().slice(0,16);
+}
+function setMinus(mins) {
+  const d = new Date();
+  d.setMinutes(d.getMinutes() - mins - d.getTimezoneOffset());
+  document.getElementById('dateTime').value = d.toISOString().slice(0,16);
+}
+
+// ========== STATUS ==========
+function getStatus(v) {
+  if (v < 54) return { label:'⚠️ Hipoglicemia grave', cls:'very-low', color:'#fca5a5' };
+  if (v < 70) return { label:'🔴 Hipoglicemia', cls:'low', color:'var(--danger)' };
+  if (v <= 100) return { label:'🟢 Normal em jejum', cls:'normal', color:'var(--ok)' };
+  if (v <= 140) return { label:'🟡 Elevada', cls:'high', color:'var(--warning)' };
+  return { label:'🔴 Muito elevada', cls:'high', color:'var(--warning)' };
+}
+
+function updateStatus() {
+  const v = parseInt(document.getElementById('glicoseVal').value);
+  const badge = document.getElementById('statusBadge');
+  const alert = document.getElementById('alertBanner');
+  if (!v || isNaN(v)) { badge.innerHTML = ''; return; }
+  const s = getStatus(v);
+  badge.innerHTML = `<div class="status-badge ${s.cls}">${s.label}</div>`;
+  if (v < 70) {
+    alert.classList.add('visible');
+    document.getElementById('alertText').textContent = v < 54
+      ? 'Glicose muito baixa! Consuma açúcar imediatamente e chame ajuda se necessário.'
+      : 'Glicose baixa! Consuma 15g de carboidrato rápido (suco, mel, açúcar).';
+  } else {
+    alert.classList.remove('visible');
+  }
+}
+
+// ========== CHIPS ==========
+function toggleChip(el, value) {
+  el.classList.toggle('selected');
+  const isSymptom = el.closest('#symptomsChips');
+  const arr = isSymptom ? selectedSymptoms : selectedMeds;
+  const idx = arr.indexOf(value);
+  if (idx >= 0) arr.splice(idx, 1);
+  else arr.push(value);
+}
+
+// ========== SAVE ==========
+function saveRecord() {
+  const glicose = parseInt(document.getElementById('glicoseVal').value);
+  const dateTime = document.getElementById('dateTime').value;
+
+  if (!glicose || isNaN(glicose)) { showToast('Informe a glicose!', 'danger'); return; }
+  if (!dateTime) { showToast('Informe o horário!', 'danger'); return; }
+
+  const record = {
+    id: Date.now(),
+    glicose,
+    dateTime,
+    symptoms: [...selectedSymptoms],
+    meds: [...selectedMeds],
+    medNote: document.getElementById('medNote').value.trim(),
+    foodBefore: document.getElementById('foodBefore').value.trim(),
+    timeBefore: document.getElementById('timeBefore').value,
+    carbsGrams: document.getElementById('carbsGrams').value,
+    symptomsDelay: document.getElementById('symptomsDelay').value,
+    freeNote: document.getElementById('freeNote').value.trim(),
+    status: getStatus(glicose).cls
+  };
+
+  records.unshift(record);
+  save();
+  clearForm();
+  updateHeaderValue();
+  showToast('✓ Registro salvo!', 'success');
+
+  if (glicose < 70) {
+    setTimeout(() => showToast('⚠️ Lembre de repetir a medição em 15 min', 'danger'), 1500);
+  }
+}
+
+function clearForm() {
+  document.getElementById('glicoseVal').value = '';
+  document.getElementById('foodBefore').value = '';
+  document.getElementById('timeBefore').value = '';
+  document.getElementById('carbsGrams').value = '';
+  document.getElementById('symptomsDelay').value = '';
+  document.getElementById('medNote').value = '';
+  document.getElementById('freeNote').value = '';
+  document.getElementById('statusBadge').innerHTML = '';
+  document.getElementById('alertBanner').classList.remove('visible');
+  document.querySelectorAll('.chip.selected').forEach(c => c.classList.remove('selected'));
+  selectedSymptoms = [];
+  selectedMeds = [];
+  setNow();
+}
+
+// ========== STORAGE ==========
+function save() {
+  localStorage.setItem('glicose_records', JSON.stringify(records));
+}
+
+// ========== HEADER VALUE ==========
+function updateHeaderValue() {
+  const el = document.getElementById('headerValue');
+  if (!records.length) { el.textContent = '—'; el.style.color = ''; return; }
+  const last = records[0];
+  el.textContent = last.glicose;
+  el.style.color = getStatus(last.glicose).color;
+}
+
+// ========== TABS ==========
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('content-' + tab).classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'grafico') renderChart();
+  if (tab === 'historico') renderHistory();
+}
+
+// ========== CHART ==========
+function renderChart() {
+  const last = records.slice(0, 50).reverse();
+  if (!last.length) return;
+
+  const canvas = document.getElementById('glucoseChart');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.parentElement.clientWidth;
+  const H = 170;
+  canvas.width = W * window.devicePixelRatio;
+  canvas.height = H * window.devicePixelRatio;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+  ctx.clearRect(0, 0, W, H);
+
+  const vals = last.map(r => r.glicose);
+  const minV = Math.min(...vals, 50);
+  const maxV = Math.max(...vals, 180);
+  const pad = { t: 16, r: 16, b: 28, l: 36 };
+  const gW = W - pad.l - pad.r;
+  const gH = H - pad.t - pad.b;
+
+  function xPos(i) { return pad.l + (i / (last.length - 1 || 1)) * gW; }
+  function yPos(v) { return pad.t + gH - ((v - minV) / (maxV - minV)) * gH; }
+
+  // Reference zones
+  const y70 = yPos(70);
+  const y100 = yPos(100);
+
+  // Danger zone fill
+  const dangerGrad = ctx.createLinearGradient(0, yPos(minV), 0, y70);
+  dangerGrad.addColorStop(0, 'rgba(248,113,113,0.12)');
+  dangerGrad.addColorStop(1, 'rgba(248,113,113,0.04)');
+  ctx.fillStyle = dangerGrad;
+  ctx.fillRect(pad.l, y70, gW, yPos(minV) - y70);
+
+  // Reference lines
+  ctx.setLineDash([4, 4]);
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = 'rgba(248,113,113,0.4)';
+  ctx.beginPath(); ctx.moveTo(pad.l, y70); ctx.lineTo(pad.l + gW, y70); ctx.stroke();
+  ctx.strokeStyle = 'rgba(74,222,128,0.3)';
+  ctx.beginPath(); ctx.moveTo(pad.l, y100); ctx.lineTo(pad.l + gW, y100); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Line
+  const lineGrad = ctx.createLinearGradient(pad.l, 0, pad.l + gW, 0);
+  lineGrad.addColorStop(0, '#c084fc');
+  lineGrad.addColorStop(1, '#f0abfc');
+  ctx.strokeStyle = lineGrad;
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  last.forEach((r, i) => {
+    if (i === 0) ctx.moveTo(xPos(i), yPos(r.glicose));
+    else ctx.lineTo(xPos(i), yPos(r.glicose));
+  });
+  ctx.stroke();
+
+  // Area fill
+  const areaGrad = ctx.createLinearGradient(0, pad.t, 0, H - pad.b);
+  areaGrad.addColorStop(0, 'rgba(192,132,252,0.2)');
+  areaGrad.addColorStop(1, 'rgba(192,132,252,0)');
+  ctx.fillStyle = areaGrad;
+  ctx.beginPath();
+  last.forEach((r, i) => {
+    if (i === 0) ctx.moveTo(xPos(i), yPos(r.glicose));
+    else ctx.lineTo(xPos(i), yPos(r.glicose));
+  });
+  ctx.lineTo(xPos(last.length - 1), H - pad.b);
+  ctx.lineTo(xPos(0), H - pad.b);
+  ctx.closePath();
+  ctx.fill();
+
+  // Dots
+  last.forEach((r, i) => {
+    const s = getStatus(r.glicose);
+    const colors = { 'very-low': '#fca5a5', 'low': '#f87171', 'normal': '#4ade80', 'high': '#fbbf24' };
+    ctx.beginPath();
+    ctx.arc(xPos(i), yPos(r.glicose), 4, 0, Math.PI * 2);
+    ctx.fillStyle = colors[s.cls] || '#c084fc';
+    ctx.fill();
+    ctx.strokeStyle = '#1a0a2e';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  });
+
+  // Y labels
+  ctx.fillStyle = 'rgba(157,138,181,0.7)';
+  ctx.font = '10px DM Sans, sans-serif';
+  ctx.textAlign = 'right';
+  [minV, 70, 100, maxV].forEach(v => {
+    if (v >= minV && v <= maxV) {
+      ctx.fillText(v, pad.l - 4, yPos(v) + 3);
+    }
+  });
+
+  // X labels
+  ctx.textAlign = 'center';
+  const step = Math.max(1, Math.floor(last.length / 5));
+  last.forEach((r, i) => {
+    if (i % step === 0 || i === last.length - 1) {
+      const d = new Date(r.dateTime);
+      const label = `${d.getDate()}/${d.getMonth()+1} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
+      ctx.fillText(label, xPos(i), H - pad.b + 14);
+    }
+  });
+
+  // Stats
+  const avg = Math.round(vals.reduce((a,b) => a+b, 0) / vals.length);
+  document.getElementById('statMedia').textContent = avg;
+  document.getElementById('statMin').textContent = Math.min(...vals);
+  document.getElementById('statMax').textContent = Math.max(...vals);
+
+  // Patterns
+  renderPatterns();
+}
+
+function renderPatterns() {
+  const el = document.getElementById('patternsContent');
+  const withFood = records.filter(r => r.foodBefore && r.glicose < 70);
+  const withDelay = records.filter(r => r.symptomsDelay && r.glicose < 70);
+
+  if (!records.length) { el.textContent = 'Sem dados suficientes ainda.'; return; }
+
+  let html = '';
+  html += `<p>Total de registros: <strong>${records.length}</strong></p>`;
+  html += `<p>Episódios de hipoglicemia (&lt;70): <strong>${records.filter(r=>r.glicose<70).length}</strong></p>`;
+
+  if (withFood.length > 0) {
+    const foods = withFood.map(r => r.foodBefore).join(', ');
+    html += `<p style="margin-top:10px">🍽️ Alimentos antes de hipoglicemias: <em>${foods.substring(0,120)}${foods.length>120?'...':''}</em></p>`;
+  }
+
+  const delays = {};
+  withDelay.forEach(r => { delays[r.symptomsDelay] = (delays[r.symptomsDelay] || 0) + 1; });
+  const topDelay = Object.entries(delays).sort((a,b) => b[1]-a[1])[0];
+  if (topDelay) {
+    html += `<p>⏱️ Tempo mais comum até sintomas: <strong>${topDelay[0]}</strong> (${topDelay[1]}x)</p>`;
+  }
+
+  const symCounts = {};
+  records.filter(r=>r.glicose<70).forEach(r => {
+    r.symptoms.forEach(s => { symCounts[s] = (symCounts[s] || 0) + 1; });
+  });
+  const topSym = Object.entries(symCounts).sort((a,b) => b[1]-a[1]).slice(0,3);
+  if (topSym.length) {
+    html += `<p>😰 Sintomas mais frequentes: <strong>${topSym.map(s=>s[0]).join(', ')}</strong></p>`;
+  }
+
+  if (!withFood.length && !withDelay.length) {
+    html += `<p style="margin-top:8px;color:var(--muted)">Continue registrando para identificar padrões de hipoglicemia reativa.</p>`;
+  }
+
+  el.innerHTML = html;
+}
+
+// ========== HISTORY ==========
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  let filtered = records;
+  if (currentFilter === 'baixo') filtered = records.filter(r => r.glicose < 70);
+  if (currentFilter === 'normal') filtered = records.filter(r => r.glicose >= 70 && r.glicose <= 100);
+  if (currentFilter === 'alto') filtered = records.filter(r => r.glicose > 100);
+
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty-state"><span class="emoji">📋</span><p>Nenhum registro${currentFilter !== 'todos' ? ' com esse filtro' : ''} ainda.<br>Comece pelo tab Registrar!</p></div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(r => {
+    const d = new Date(r.dateTime);
+    const dateStr = d.toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric' });
+    const timeStr = d.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+    const status = getStatus(r.glicose);
+    return `
+      <div class="history-item ${status.cls}">
+        <div class="history-glicose ${status.cls}">${r.glicose}<br><span style="font-size:0.65rem;font-family:'DM Sans'">mg/dL</span></div>
+        <div class="history-details">
+          <div class="history-time">${dateStr} · ${timeStr}</div>
+          ${r.symptoms.length ? `<div class="history-symptoms">${r.symptoms.join(' · ')}</div>` : ''}
+          ${r.foodBefore ? `<div class="history-food">🍽️ ${r.foodBefore.substring(0,60)}${r.foodBefore.length>60?'...':''} ${r.timeBefore ? '('+r.timeBefore+' antes)':''}</div>` : ''}
+          ${r.symptomsDelay ? `<div class="history-note">⏱️ Sintomas após: ${r.symptomsDelay}</div>` : ''}
+          ${r.meds.length ? `<div class="history-note">💊 ${r.meds.join(', ')}</div>` : ''}
+          ${r.freeNote ? `<div class="history-note">📝 ${r.freeNote.substring(0,80)}</div>` : ''}
+        </div>
+        <button class="history-delete" onclick="deleteRecord(${r.id})">✕</button>
+      </div>`;
+  }).join('');
+}
+
+function filterHistory(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderHistory();
+}
+
+function deleteRecord(id) {
+  records = records.filter(r => r.id !== id);
+  save();
+  updateHeaderValue();
+  renderHistory();
+  showToast('Registro removido');
+}
+
+// ========== EXPORT ==========
+function exportCSV() {
+  if (!records.length) { showToast('Nenhum dado para exportar', 'danger'); return; }
+  const headers = ['Data/Hora','Glicose(mg/dL)','Status','Sintomas','O que comeu','Tempo antes','Carbs(g)','Sintomas após','Medicamentos','Observação'];
+  const rows = records.map(r => [
+    r.dateTime, r.glicose, getStatus(r.glicose).cls.replace('very-low','hipoglicemia grave').replace('low','hipoglicemia').replace('normal','normal').replace('high','elevada'),
+    r.symptoms.join(';'), r.foodBefore, r.timeBefore, r.carbsGrams, r.symptomsDelay,
+    r.meds.join(';') + (r.medNote ? ' '+r.medNote : ''), r.freeNote
+  ].map(v => `"${(v||'').toString().replace(/"/g,'""')}"`));
+  const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+  const blob = new Blob(['\ufeff'+csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `glicose_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+  showToast('📄 CSV exportado!', 'success');
+}
+
+function clearAll() {
+  if (!records.length) { showToast('Nada para limpar', 'danger'); return; }
+  if (confirm(`Apagar todos os ${records.length} registros? Esta ação não pode ser desfeita.`)) {
+    records = [];
+    save();
+    updateHeaderValue();
+    renderHistory();
+    showToast('Dados apagados');
+  }
+}
+
+// ========== TOAST ==========
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (type ? ' ' + type : '');
+  void t.offsetWidth;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+</script>
+
+<!-- SERVICE WORKER -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
