@@ -1,5 +1,5 @@
-const CACHE = 'glicose-v1';
-const ASSETS = ['/', '/index.html'];
+const CACHE = 'glicose-v2';
+const ASSETS = ['./', './index.html'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
